@@ -1,254 +1,140 @@
-const goldSeries = [2339.6, 2343.2, 2337.1, 2347.2, 2351.8, 2344.9, 2358.5, 2362.1, 2355.4, 2368.3, 2371.5, 2366.7, 2380.9, 2386.4, 2391.2, 2387.6, 2398.4, 2402.1, 2397.8, 2408.7];
-
-const marketSnapshot = {
-  gold: {
-    price: 2408.7,
-    change: 21.4,
-    changePct: 0.9,
-    open: 2387.3,
-    high: 2414.8,
-    low: 2382.1,
-    range: 32.7,
-    trend: "Bullish",
-    volatility: "Moderate"
-  },
-  dxy: { value: 108.64, change: 0.24, changePct: 0.22 },
-  yield: { value: 4.39, change: 0.06, changePct: 1.39 },
-  silver: { value: 29.81, change: 0.56, changePct: 1.91 },
-  sp500: { value: 5817.36, change: 16.2, changePct: 0.28 }
-};
-
-const marketDrivers = [
-  { label: "US Dollar Index", detail: "DXY firming", value: "+0.22%", tone: "positive" },
-  { label: "Treasury yields", detail: "Rate expectations steady", value: "4.39%", tone: "negative" },
-  { label: "Real yields", detail: "Support remains constructive", value: "+2.10%", tone: "positive" },
-  { label: "Geopolitical risk", detail: "Safe-haven demand", value: "Elevated", tone: "positive" },
-  { label: "Fed path", detail: "Awaiting policy guidance", value: "Neutral", tone: "neutral" }
+const BASE = 2408.70;
+const instrumentData = [
+  { symbol: "XAU/USD", name: "Gold Spot", price: 2408.70, change: 0.90 },
+  { symbol: "XAG/USD", name: "Silver Spot", price: 29.81, change: 1.91 },
+  { symbol: "DXY", name: "US Dollar Index", price: 104.23, change: -0.22 },
+  { symbol: "US10Y", name: "US 10Y Yield", price: 4.39, change: 0.06 },
+  { symbol: "EUR/USD", name: "Euro / US Dollar", price: 1.0842, change: -0.18 }
 ];
-
-const watchlist = [
-  { symbol: "XAU/USD", last: "2408.70", daily: "+0.90%", bias: "Bullish" },
-  { symbol: "XAG/USD", last: "29.81", daily: "+1.91%", bias: "Bullish" },
-  { symbol: "USD/JPY", last: "149.52", daily: "+0.12%", bias: "Neutral" },
-  { symbol: "EUR/USD", last: "1.0603", daily: "-0.18%", bias: "Bearish" },
-  { symbol: "US10Y", last: "4.39%", daily: "+0.06%", bias: "Bearish" }
-];
-
-const newsList = [
-  {
-    tag: "High",
-    title: "Fed speakers reinforce cautious tone while bullion holds firm above key support",
-    meta: "Policy guidance and real yields remain key for gold direction",
-    time: "08:40 GMT"
-  },
-  {
-    tag: "Medium",
-    title: "US Treasury yields drift higher, but weaker dollar support cushions gold demand",
-    meta: "A softening dollar offsets some pressure from higher yields",
-    time: "06:25 GMT"
-  },
-  {
-    tag: "High",
-    title: "Geopolitical risk keeps safe-haven flows alive as traders monitor regional headlines",
-    meta: "Gold benefits from uncertainty and positioning into key macro releases",
-    time: "04:10 GMT"
-  },
-  {
-    tag: "Medium",
-    title: "China data focus and commodity demand remain in play across metals markets",
-    meta: "Industrial demand and macro signals can influence broader precious metals sentiment",
-    time: "02:55 GMT"
-  }
-];
-
-const sentiment = [
-  { label: "Gold appetite", value: 78 },
-  { label: "Dollar strength", value: 58 },
-  { label: "Yield pressure", value: 66 },
-  { label: "Risk sentiment", value: 54 }
-];
+const timeframes = { "1H": 30, "4H": 48, "1D": 64, "1W": 72, "1M": 84 };
+let selectedSide = "buy";
+let activeFrame = "1D";
+let toastTimer;
 
 const calendar = [
-  { time: "18:00", currency: "USD", event: "FOMC Member Speech", impact: "High", actual: "-", forecast: "-", previous: "-" },
-  { time: "13:30", currency: "USD", event: "Core PCE Price Index", impact: "High", actual: "2.6%", forecast: "2.6%", previous: "2.5%" },
-  { time: "13:30", currency: "USD", event: "GDP Annualized", impact: "High", actual: "2.8%", forecast: "2.5%", previous: "2.1%" },
-  { time: "12:00", currency: "EUR", event: "ECB Press Conference", impact: "High", actual: "-", forecast: "-", previous: "-" },
-  { time: "09:30", currency: "GBP", event: "Claimant Count Change", impact: "Medium", actual: "-", forecast: "7.2K", previous: "8.4K" },
-  { time: "09:30", currency: "USD", event: "Initial Jobless Claims", impact: "Medium", actual: "216K", forecast: "220K", previous: "218K" }
+  { time: "13:30", ccy: "USD", event: "Core PCE Price Index", impact: "High", actual: "—", forecast: "—", previous: "—" },
+  { time: "14:00", ccy: "USD", event: "Pending Home Sales", impact: "Medium", actual: "—", forecast: "—", previous: "—" },
+  { time: "16:00", ccy: "USD", event: "Crude Oil Inventories", impact: "Medium", actual: "—", forecast: "—", previous: "—" },
+  { time: "18:00", ccy: "USD", event: "FOMC Member Speech", impact: "High", actual: "—", forecast: "—", previous: "—" }
+];
+const headlines = [
+  { category: "MACRO", time: "Contoh", text: "Pergerakan imbal hasil AS dan ekspektasi suku bunga dapat memengaruhi daya tarik emas." },
+  { category: "USD", time: "Contoh", text: "Indeks dolar sering dipantau sebagai salah satu faktor kontekstual untuk XAU/USD." },
+  { category: "RISK", time: "Contoh", text: "Permintaan aset safe-haven dapat berubah saat sentimen risiko dan ketidakpastian meningkat." }
+];
+const drivers = [
+  { name: "US Dollar Index", detail: "Contoh perubahan harian", value: "−0.22%", tone: "up" },
+  { name: "US 10Y yield", detail: "Contoh yield indikatif", value: "4.39%", tone: "down" },
+  { name: "Real yields", detail: "Perlu data terverifikasi", value: "N/A", tone: "" },
+  { name: "Risk sentiment", detail: "Ringkasan editorial demo", value: "Mixed", tone: "" }
 ];
 
-function formatMoney(value) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value);
-}
-
-function renderHeader() {
-  const gold = marketSnapshot.gold;
-  const changeClass = gold.changePct >= 0 ? "positive" : "negative";
-
-  document.getElementById("goldPrice").textContent = formatMoney(gold.price);
-  document.getElementById("goldChange").textContent = `${gold.changePct >= 0 ? "+" : ""}${gold.changePct.toFixed(2)}%`;
-  document.getElementById("goldChange").className = `change-pill ${changeClass}`;
-  document.getElementById("goldOpen").textContent = formatMoney(gold.open);
-  document.getElementById("goldHigh").textContent = formatMoney(gold.high);
-  document.getElementById("goldLow").textContent = formatMoney(gold.low);
-  document.getElementById("goldRange").textContent = formatMoney(gold.range);
-  document.getElementById("trendLabel").textContent = gold.trend;
-  document.getElementById("volatilityValue").textContent = gold.volatility;
-
-  document.getElementById("dxyValue").textContent = marketSnapshot.dxy.value.toFixed(2);
-  document.getElementById("dxyChange").textContent = `${marketSnapshot.dxy.changePct >= 0 ? "+" : ""}${marketSnapshot.dxy.changePct.toFixed(2)}%`;
-  document.getElementById("dxyChange").className = `stat-foot ${marketSnapshot.dxy.changePct >= 0 ? "positive" : "negative"}`;
-
-  document.getElementById("yieldValue").textContent = `${marketSnapshot.yield.value.toFixed(2)}%`;
-  document.getElementById("yieldChange").textContent = `${marketSnapshot.yield.changePct >= 0 ? "+" : ""}${marketSnapshot.yield.changePct.toFixed(2)}%`;
-  document.getElementById("yieldChange").className = `stat-foot ${marketSnapshot.yield.changePct >= 0 ? "positive" : "negative"}`;
-
-  document.getElementById("silverValue").textContent = formatMoney(marketSnapshot.silver.value);
-  document.getElementById("silverChange").textContent = `${marketSnapshot.silver.changePct >= 0 ? "+" : ""}${marketSnapshot.silver.changePct.toFixed(2)}%`;
-  document.getElementById("silverChange").className = `stat-foot ${marketSnapshot.silver.changePct >= 0 ? "positive" : "negative"}`;
-
-  document.getElementById("sp500Value").textContent = marketSnapshot.sp500.value.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  document.getElementById("sp500Change").textContent = `${marketSnapshot.sp500.changePct >= 0 ? "+" : ""}${marketSnapshot.sp500.changePct.toFixed(2)}%`;
-  document.getElementById("sp500Change").className = `stat-foot ${marketSnapshot.sp500.changePct >= 0 ? "positive" : "negative"}`;
-}
-
-function renderChart() {
-  const svg = document.getElementById("goldChart");
-  const width = 740;
-  const height = 250;
-  const min = Math.min(...goldSeries) - 8;
-  const max = Math.max(...goldSeries) + 8;
-
-  const points = goldSeries
-    .map((value, index) => {
-      const x = (index / (goldSeries.length - 1)) * width;
-      const y = height - ((value - min) / (max - min || 1)) * (height - 18) - 10;
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  const areaPoints = `0,${height} ${points} ${width},${height}`;
-
-  svg.innerHTML = `
-    <defs>
-      <linearGradient id="goldArea" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0%" stop-color="rgba(243,199,108,0.45)" />
-        <stop offset="100%" stop-color="rgba(243,199,108,0.02)" />
-      </linearGradient>
-    </defs>
-    <g>
-      <path d="M ${areaPoints}" fill="url(#goldArea)"></path>
-      <polyline
-        points="${points}"
-        fill="none"
-        stroke="#f3c76c"
-        stroke-width="3.2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      ></polyline>
-    </g>
-  `;
-}
-
-function renderDrivers() {
-  const node = document.getElementById("driverList");
-  node.innerHTML = marketDrivers
-    .map((item) => {
-      const toneClass = item.tone === "positive" ? "positive" : item.tone === "negative" ? "negative" : "neutral";
-      return `
-        <div class="driver-item">
-          <div class="driver-label">
-            <strong>${item.label}</strong>
-            <span>${item.detail}</span>
-          </div>
-          <div class="driver-value ${toneClass}">${item.value}</div>
-        </div>
-      `;
-    })
-    .join("");
-}
+function money(value) { return new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value); }
+function signed(value) { return `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(2)}%`; }
 
 function renderWatchlist() {
-  const node = document.getElementById("watchlistTable");
-  node.innerHTML = watchlist
-    .map((item) => {
-      const changeClass = item.daily.includes("-") ? "negative" : "positive";
-      return `
-        <tr>
-          <td>${item.symbol}</td>
-          <td>${item.last}</td>
-          <td class="${changeClass}">${item.daily}</td>
-          <td>${item.bias}</td>
-        </tr>
-      `;
-    })
-    .join("");
+  document.getElementById("watchlist").innerHTML = instrumentData.map((item, index) => `
+    <div class="watch-item ${index === 0 ? "active" : ""}">
+      <span class="watch-symbol">${item.symbol}</span><span class="watch-price">${item.price < 10 ? item.price.toFixed(4) : money(item.price)}</span>
+      <span class="watch-name">${item.name}</span><span class="watch-change ${item.change >= 0 ? "up" : "down"}">${signed(item.change)}</span>
+    </div>`).join("");
 }
-
-function renderSentiment() {
-  const node = document.getElementById("sentimentList");
-  node.innerHTML = sentiment
-    .map((item) => `
-      <div class="sentiment-item">
-        <strong>${item.label}</strong>
-        <div class="sentiment-bar">
-          <div class="sentiment-fill" style="width: ${item.value}%"></div>
-        </div>
-      </div>
-    `)
-    .join("");
+function renderHeader() {
+  document.getElementById("goldPrice").textContent = money(BASE);
+  document.getElementById("goldChange").textContent = `${signed(0.90)} · DEMO`;
+  document.getElementById("goldOpen").textContent = money(2387.30);
+  document.getElementById("goldHigh").textContent = money(2414.80);
+  document.getElementById("goldLow").textContent = money(2382.10);
+  document.getElementById("prevClose").textContent = money(2387.30);
 }
-
+function renderChart(frame = activeFrame) {
+  activeFrame = frame;
+  const svg = document.getElementById("priceChart");
+  const count = timeframes[frame];
+  let value = BASE - 25;
+  const series = Array.from({ length: count }, (_, i) => {
+    value += Math.sin(i * 0.43) * 1.65 + Math.cos(i * 0.19) * 1.1 + (i > count * .65 ? .32 : .08);
+    return value;
+  });
+  series[series.length - 1] = BASE;
+  const width = 900, height = 330, left = 8, right = 54, top = 14, bottom = 22;
+  const low = Math.min(...series) - 5, high = Math.max(...series) + 5;
+  const x = i => left + i / (series.length - 1) * (width - left - right);
+  const y = v => top + (high - v) / (high - low) * (height - top - bottom);
+  const pts = series.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const area = `M${x(0)},${height-bottom} L${pts.replaceAll(" ", " L")} L${x(series.length - 1)},${height-bottom} Z`;
+  const grid = Array.from({ length: 5 }, (_, i) => {
+    const yy = top + i * (height - top - bottom) / 4;
+    const label = high - i * (high - low) / 4;
+    return `<line x1="${left}" y1="${yy}" x2="${width-right}" y2="${yy}" stroke="#202b34" stroke-dasharray="3 5"/><text x="${width-right+7}" y="${yy+3}" fill="#748391" font-size="9" font-family="DM Mono">${label.toFixed(0)}</text>`;
+  }).join("");
+  const candleCount = Math.min(24, series.length - 1);
+  const candles = Array.from({ length: candleCount }, (_, j) => {
+    const i = Math.floor(j * (series.length - 1) / candleCount) + 1;
+    const prev = series[i - 1], close = series[i];
+    const up = close >= prev, xx = x(i), topY = Math.min(y(prev), y(close)), bodyH = Math.max(2, Math.abs(y(prev) - y(close));
+    return `<line x1="${xx}" y1="${topY-4}" x2="${xx}" y2="${topY+bodyH+4}" stroke="${up ? "#42c99a" : "#f07878"}" opacity=".55"/><rect x="${xx-2.2}" y="${topY}" width="4.4" height="${bodyH}" fill="${up ? "#42c99a" : "#f07878"}" opacity=".75"/>`;
+  }).join("");
+  svg.innerHTML = `<defs><linearGradient id="areaFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d9ad54" stop-opacity=".2"/><stop offset="1" stop-color="#d9ad54" stop-opacity="0"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#areaFill)"/><g>${candles}</g><polyline points="${pts}" fill="none" stroke="#e4b85e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><line x1="${x(0)}" y1="${y(BASE)}" x2="${width-right}" y2="${y(BASE)}" stroke="#d6b568" stroke-dasharray="4 4" opacity=".65"/><rect x="${width-right+3}" y="${y(BASE)-9}" width="47" height="18" rx="3" fill="#d5ae5d"/><text x="${width-right+7}" y="${y(BASE)+3}" fill="#15130e" font-size="9" font-family="DM Mono">${BASE.toFixed(2)}</text>`;
+  document.getElementById("chartIntervalLabel").textContent = `· ${frame}`;
+  document.getElementById("chartOhlc").textContent = `O ${money(series[0])}   H ${money(high - 5)}   L ${money(low + 5)}   C ${money(BASE)}`;
+}
+function renderIndicators() {
+  const data = [
+    ["RSI (14)", "57.8", "NEUTRAL"], ["MACD", "+1.24", "POSITIVE"], ["SMA (20)", "2,397.40", "PRICE ABOVE"], ["ATR (14)", "12.60", "MODERATE"]
+  ];
+  document.getElementById("indicators").innerHTML = data.map(([label, value, note]) => `<div class="indicator"><span>${label}</span><b>${value}</b><em>${note}</em></div>`).join("");
+}
 function renderCalendar() {
-  const node = document.getElementById("calendarTable");
-  node.innerHTML = calendar
-    .map((item) => `
-      <tr>
-        <td>${item.time}</td>
-        <td>${item.currency}</td>
-        <td>${item.event}</td>
-        <td><span class="${item.impact === "High" ? "negative" : item.impact === "Medium" ? "neutral" : "positive"}">${item.impact}</span></td>
-        <td>${item.actual}</td>
-        <td>${item.forecast}</td>
-        <td>${item.previous}</td>
-      </tr>
-    `)
-    .join("");
+  document.getElementById("calendarRows").innerHTML = calendar.map(e => `<tr><td class="event-time">${e.time}</td><td>${e.ccy}</td><td>${e.event}</td><td><span class="impact ${e.impact.toLowerCase()}">${e.impact}</span></td><td>${e.actual}</td><td>${e.forecast}</td><td>${e.previous}</td></tr>`).join("");
 }
-
+function renderDrivers() {
+  document.getElementById("drivers").innerHTML = drivers.map(d => `<div class="driver"><div class="driver-label"><b>${d.name}</b><small>${d.detail}</small></div><span class="driver-value ${d.tone}">${d.value}</span></div>`).join("");
+}
 function renderNews() {
-  const node = document.getElementById("newsList");
-  node.innerHTML = newsList
-    .map((item) => `
-      <article class="news-item">
-        <span class="news-tag ${item.tag.toLowerCase()}">${item.tag}</span>
-        <div class="news-copy">
-          <strong>${item.title}</strong>
-          <span>${item.meta}</span>
-        </div>
-        <div class="news-time">${item.time}</div>
-      </article>
-    `)
-    .join("");
+  document.getElementById("newsRows").innerHTML = headlines.map(item => `<article class="news-item"><div class="news-meta"><i class="news-dot"></i>${item.category}<span>·</span>${item.time}</div><p>${item.text}</p></article>`).join("");
+}
+function updateRisk() {
+  const entry = Number(document.getElementById("entryPrice").value) || 0;
+  const lots = Number(document.getElementById("lotSize").value) || 0;
+  const sl = Number(document.getElementById("stopLoss").value) || 0;
+  const tp = Number(document.getElementById("takeProfit").value) || 0;
+  const risk = Math.abs(entry - sl) * lots * 100;
+  const reward = Math.abs(tp - entry) * lots * 100;
+  document.getElementById("riskValue").textContent = `$${money(risk)}`;
+  document.getElementById("rewardValue").textContent = `$${money(reward)}`;
+  document.getElementById("rrValue").textContent = risk ? `1 : ${(reward / risk).toFixed(2)}` : "—";
+}
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 3000);
+}
+function updateClock() {
+  const time = new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(new Date());
+  document.getElementById("clock").textContent = `${time} WIB`;
 }
 
-function updateTimestamp() {
-  const updated = new Date();
-  document.getElementById("lastUpdated").textContent = `Updated ${updated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-}
+document.getElementById("timeframes").addEventListener("click", event => {
+  const button = event.target.closest("button[data-frame]");
+  if (!button) return;
+  document.querySelectorAll("#timeframes button").forEach(item => item.classList.toggle("selected", item === button));
+  renderChart(button.dataset.frame);
+});
+document.getElementById("resetChart").addEventListener("click", () => renderChart(activeFrame));
+document.getElementById("sideToggle").addEventListener("click", event => {
+  const button = event.target.closest("button[data-side]");
+  if (!button) return;
+  selectedSide = button.dataset.side;
+  document.querySelectorAll("#sideToggle button").forEach(item => item.classList.toggle("selected", item === button));
+  updateRisk();
+});
+["entryPrice", "lotSize", "stopLoss", "takeProfit"].forEach(id => document.getElementById(id).addEventListener("input", updateRisk));
+document.getElementById("paperOrder").addEventListener("click", () => showToast(`Order ${selectedSide.toUpperCase()} hanya simulasi — tidak dikirim ke broker.`));
+document.getElementById("addWatch").addEventListener("click", () => showToast("Watchlist demo: instrumen contoh sudah ditampilkan."));
+document.getElementById("resetChart").setAttribute("aria-label", "Gambar ulang grafik demo");
 
-renderHeader();
-renderChart();
-renderDrivers();
-renderWatchlist();
-renderSentiment();
-renderCalendar();
-renderNews();
-updateTimestamp();
-
-setInterval(updateTimestamp, 60000);
+renderWatchlist(); renderHeader(); renderChart(); renderIndicators(); renderCalendar(); renderDrivers(); renderNews(); updateRisk(); updateClock();
+setInterval(updateClock, 1000);
