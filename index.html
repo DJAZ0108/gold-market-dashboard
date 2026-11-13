@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gold Market Dashboard</title>
+    <title>Gold Terminal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -11,184 +11,205 @@
   </head>
   <body>
     <div class="app-shell">
-      <header class="topbar">
-        <div class="brand-wrap">
-          <div class="brand-mark">XAU</div>
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">G</div>
           <div>
-            <div class="eyebrow">Market dashboard</div>
-            <h1>Gold Pulse</h1>
+            <div class="brand-kicker">Market</div>
+            <strong>Gold Terminal</strong>
           </div>
         </div>
 
-        <nav class="nav-links">
-          <a href="#overview">Overview</a>
-          <a href="#drivers">Drivers</a>
-          <a href="#calendar">Calendar</a>
-          <a href="#news">News</a>
+        <nav class="side-nav">
+          <div class="nav-group">
+            <span class="nav-label">Overview</span>
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Markets</a>
+            <a href="#">FX</a>
+            <a href="#">Commodities</a>
+          </div>
+          <div class="nav-group">
+            <span class="nav-label">Tools</span>
+            <a href="#">Calendar</a>
+            <a href="#">News</a>
+            <a href="#">Risk</a>
+          </div>
         </nav>
 
-        <div class="market-status">
-          <span class="status-dot"></span>
-          <span id="lastUpdated">Updated --:--</span>
+        <div class="session-box">
+          <div class="session-head">
+            <span>Session</span>
+            <span class="online">Online</span>
+          </div>
+          <div class="session-time">NY Open · 13:30</div>
         </div>
-      </header>
+      </aside>
 
-      <main class="dashboard">
-        <section id="overview" class="hero panel">
-          <div class="hero-copy">
-            <div class="section-tag">Spot Gold</div>
-            <div class="price-row">
-              <h2 id="goldPrice">$0.00</h2>
-              <span class="change-pill positive" id="goldChange">+0.00%</span>
+      <main class="main-panel">
+        <header class="topbar">
+          <div class="market-title-wrap">
+            <div class="market-title">
+              <span class="symbol">XAU/USD</span>
+              <span class="market-type">Spot Gold</span>
             </div>
-            <div class="meta-row">
-              <div>
-                <span class="meta-label">Open</span>
-                <strong id="goldOpen">$0.00</strong>
-              </div>
-              <div>
-                <span class="meta-label">High</span>
-                <strong id="goldHigh">$0.00</strong>
-              </div>
-              <div>
-                <span class="meta-label">Low</span>
-                <strong id="goldLow">$0.00</strong>
-              </div>
-              <div>
-                <span class="meta-label">Range</span>
-                <strong id="goldRange">$0.00</strong>
-              </div>
+            <div class="price-stack">
+              <span id="goldPrice">$2,408.70</span>
+              <span id="goldChange" class="change-pill positive">+0.90%</span>
             </div>
           </div>
 
-          <div class="hero-rail">
-            <div class="mini-card">
-              <span>Trend</span>
-              <strong id="trendLabel">Bullish</strong>
-            </div>
-            <div class="mini-card">
-              <span>Volatility</span>
-              <strong id="volatilityValue">Low</strong>
-            </div>
-            <div class="mini-card">
-              <span>Session</span>
-              <strong>New York</strong>
-            </div>
+          <div class="top-actions">
+            <button class="ghost-btn">1D</button>
+            <button class="ghost-btn">1W</button>
+            <button class="ghost-btn active">1M</button>
+            <button class="primary-btn">Trade</button>
           </div>
-        </section>
+        </header>
 
         <section class="stats-grid">
-          <article class="panel stat-card">
-            <div class="stat-head">
-              <span>USD Index</span>
-              <span class="chip neutral">DXY</span>
-            </div>
-            <div class="stat-value" id="dxyValue">0.00</div>
-            <div class="stat-foot positive" id="dxyChange">+0.00%</div>
+          <article class="stat-card">
+            <span class="stat-label">Bid / Ask</span>
+            <strong class="stat-value">2408.30 / 2409.10</strong>
           </article>
-
-          <article class="panel stat-card">
-            <div class="stat-head">
-              <span>10Y Treasury</span>
-              <span class="chip alert">Yield</span>
-            </div>
-            <div class="stat-value" id="yieldValue">0.00%</div>
-            <div class="stat-foot negative" id="yieldChange">-0.00%</div>
+          <article class="stat-card">
+            <span class="stat-label">Spread</span>
+            <strong class="stat-value">0.80</strong>
           </article>
-
-          <article class="panel stat-card">
-            <div class="stat-head">
-              <span>Silver</span>
-              <span class="chip silver">XAG</span>
-            </div>
-            <div class="stat-value" id="silverValue">$0.00</div>
-            <div class="stat-foot positive" id="silverChange">+0.00%</div>
+          <article class="stat-card">
+            <span class="stat-label">Day Range</span>
+            <strong class="stat-value">2382.10 - 2414.80</strong>
           </article>
-
-          <article class="panel stat-card">
-            <div class="stat-head">
-              <span>SP 500</span>
-              <span class="chip neutral">US500</span>
-            </div>
-            <div class="stat-value" id="sp500Value">0.00</div>
-            <div class="stat-foot positive" id="sp500Change">+0.00%</div>
+          <article class="stat-card">
+            <span class="stat-label">Volume</span>
+            <strong class="stat-value">1.24M</strong>
           </article>
         </section>
 
-        <section id="drivers" class="content-grid two-columns">
-          <article class="panel chart-panel">
-            <div class="panel-header">
-              <h3>Gold price trend</h3>
-              <span class="source-tag">FX Factory style summary</span>
+        <section class="chart-panel panel">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">Price Chart</span>
+              <h2>Gold trend</h2>
             </div>
-            <svg id="goldChart" viewBox="0 0 740 250" preserveAspectRatio="none"></svg>
-          </article>
-
-          <article class="panel drivers-panel">
-            <div class="panel-header">
-              <h3>Key market drivers</h3>
+            <div class="legend">
+              <span class="legend-dot gold"></span> XAU/USD
             </div>
-            <div id="driverList" class="driver-list"></div>
-          </article>
+          </div>
+          <svg id="goldChart" viewBox="0 0 960 300" preserveAspectRatio="none"></svg>
         </section>
 
-        <section class="content-grid two-columns">
-          <article class="panel">
-            <div class="panel-header">
-              <h3>Watchlist</h3>
+        <section class="dashboard-grid">
+          <article class="panel left-panel">
+            <div class="panel-head compact">
+              <div>
+                <span class="panel-kicker">Positions</span>
+                <h3>Open trades</h3>
+              </div>
             </div>
+
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>Symbol</th>
-                    <th>Last</th>
-                    <th>Daily</th>
-                    <th>Bias</th>
+                    <th>Side</th>
+                    <th>Lots</th>
+                    <th>Entry</th>
+                    <th>Mark</th>
+                    <th>P/L</th>
                   </tr>
                 </thead>
-                <tbody id="watchlistTable"></tbody>
+                <tbody id="positionsTable"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <aside class="panel order-panel">
+            <div class="panel-head compact">
+              <div>
+                <span class="panel-kicker">Order Ticket</span>
+                <h3>Quick trade</h3>
+              </div>
+            </div>
+
+            <div class="order-form">
+              <div class="ticket-row">
+                <label>Buy / Sell</label>
+                <div class="toggle-group">
+                  <button class="toggle active">Buy</button>
+                  <button class="toggle">Sell</button>
+                </div>
+              </div>
+
+              <div class="ticket-row">
+                <label>Lots</label>
+                <input type="text" value="2.00" />
+              </div>
+
+              <div class="ticket-row">
+                <label>Entry</label>
+                <input type="text" value="2408.70" />
+              </div>
+
+              <div class="ticket-row">
+                <label>Stop Loss</label>
+                <input type="text" value="2397.80" />
+              </div>
+
+              <div class="ticket-row">
+                <label>Take Profit</label>
+                <input type="text" value="2428.50" />
+              </div>
+
+              <div class="order-summary">
+                <div>
+                  <span>Risk</span>
+                  <strong>$195.00</strong>
+                </div>
+                <div>
+                  <span>Reward</span>
+                  <strong>$396.00</strong>
+                </div>
+              </div>
+
+              <button class="primary-btn full">Place Order</button>
+            </div>
+          </aside>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="panel">
+            <div class="panel-head compact">
+              <div>
+                <span class="panel-kicker">Macro</span>
+                <h3>Economic calendar</h3>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Currency</th>
+                    <th>Event</th>
+                    <th>Impact</th>
+                    <th>Actual</th>
+                  </tr>
+                </thead>
+                <tbody id="calendarTable"></tbody>
               </table>
             </div>
           </article>
 
           <article class="panel">
-            <div class="panel-header">
-              <h3>Market sentiment</h3>
+            <div class="panel-head compact">
+              <div>
+                <span class="panel-kicker">News</span>
+                <h3>Market pulse</h3>
+              </div>
             </div>
-            <div class="sentiment-stack" id="sentimentList"></div>
+            <div id="newsList" class="news-list"></div>
           </article>
-        </section>
-
-        <section id="calendar" class="panel full-width-panel">
-          <div class="panel-header">
-            <h3>Forex Factory calendar</h3>
-            <span class="source-tag">Upcoming macro events</span>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Currency</th>
-                  <th>Event</th>
-                  <th>Impact</th>
-                  <th>Actual</th>
-                  <th>Forecast</th>
-                  <th>Previous</th>
-                </tr>
-              </thead>
-              <tbody id="calendarTable"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section id="news" class="panel full-width-panel">
-          <div class="panel-header">
-            <h3>Market news summary</h3>
-            <span class="source-tag">Gold-focused headlines</span>
-          </div>
-          <div id="newsList" class="news-list"></div>
         </section>
       </main>
     </div>
